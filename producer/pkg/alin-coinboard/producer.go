@@ -1,0 +1,5 @@
+package alincoinboard
+
+func producer() {
+
+}
