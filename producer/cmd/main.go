@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"sync"
 
 	"github.com/adshao/go-binance/v2"
+	"github.com/gorilla/websocket"
 )
 
 func checkError(err error) {
@@ -16,33 +18,83 @@ func checkError(err error) {
   }
 }
 
-func save_binance_aggr_trade(ticker string) {
+func save_binance_kline(ticker string) {
 
-	wsAggTradeHandler := func(event *binance.WsAggTradeEvent) {
-		fmt.Println(event)
-		f5, err := os.OpenFile("data/" + ticker + ".txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-		checkError(err)
-		_, err = io.WriteString(f5, event.Symbol + " " + event.Price + " " + event.Quantity + "\n")
-		checkError(err)
-	}
 	errHandler := func(err error) {
 		fmt.Println(err)
 	}
-	doneC, _, err := binance.WsAggTradeServe(ticker, wsAggTradeHandler, errHandler)
+	wsKlineHandler := func(event *binance.WsKlineEvent) {
+		f5, err := os.OpenFile("data/binance/" + ticker + ".txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+		checkError(err)
+
+		jsonEvent, err := json.Marshal(event)
+		checkError(err)
+
+		_, err = io.WriteString(f5, string(jsonEvent) + "\n")
+		checkError(err)
+	}
+	doneC, _, err := binance.WsKlineServe(ticker, "1s", wsKlineHandler, errHandler)
 	if err != nil {
-		fmt.Println(err)
-		return
+			fmt.Println(err)
+			return
 	}
 	<-doneC
+
 }
+
+const upbit_ws_url = "wss://api.upbit.com/websocket/v1"
+
+func save_upbit_trade_data(ticker string) {
+
+	conn, _, err := websocket.DefaultDialer.Dial(upbit_ws_url, nil)
+	if err != nil {
+			fmt.Println(err)
+			return
+	}
+	defer conn.Close()
+
+	subscribe_fmt := fmt.Sprintf(`[{"ticket":"test"},{"type":"ticker","codes":["%s"], "isOnlyRealtime" : "true"}]`, ticker) 
+
+	conn.WriteMessage(websocket.TextMessage, []byte(subscribe_fmt))
+
+	if err != nil {
+			fmt.Println(err)
+			return
+	}
+
+
+	for {
+			_, message, err := conn.ReadMessage()
+			if err != nil {
+					fmt.Println(err)
+					return
+			}
+
+			file, err := os.OpenFile("data/upbit/" + ticker + ".txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+			if err != nil {
+					fmt.Println(err)
+					return
+			}
+
+			_, err = io.WriteString(file, string(message) + "\n")
+			checkError(err)
+	}
+
+}
+
+
+
 
 func main() {
 
 	var wait sync.WaitGroup
-	wait.Add(2)
+	wait.Add(4)
 
-	go save_binance_aggr_trade("btcusdt")
-	go save_binance_aggr_trade("ethusdt")
+	go save_binance_kline("btcusdt")
+	go save_binance_kline("ethusdt")
+
+	go save_upbit_trade_data("KRW-BTC")
+	go save_upbit_trade_data("KRW-ETH")
 
 	wait.Wait()
 
