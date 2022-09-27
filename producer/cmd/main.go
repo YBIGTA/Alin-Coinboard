@@ -1,6 +1,7 @@
 package main
 
 import (
+	"alin-coinboard/producer/pkg/upbit"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,7 +9,6 @@ import (
 	"sync"
 
 	"github.com/adshao/go-binance/v2"
-	"github.com/gorilla/websocket"
 )
 
 func checkError(err error) {
@@ -18,22 +18,54 @@ func checkError(err error) {
   }
 }
 
-func save_binance_kline(ticker string) {
-
+// 주어진 symbol들에 대한 Binance API Kline 데이터를 웹소켓으로 받아와 /data/binance.txt에 저장
+// https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-streams
+func save_binance_kline(tickers []string, interval string) {
 	errHandler := func(err error) {
 		fmt.Println(err)
 	}
 	wsKlineHandler := func(event *binance.WsKlineEvent) {
-		f5, err := os.OpenFile("data/binance/" + ticker + ".txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+		file, err := os.OpenFile("data/binance.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 		checkError(err)
 
 		jsonEvent, err := json.Marshal(event)
 		checkError(err)
 
-		_, err = io.WriteString(f5, string(jsonEvent) + "\n")
+		_, err = io.WriteString(file, string(jsonEvent) + "\n")
 		checkError(err)
 	}
-	doneC, _, err := binance.WsKlineServe(ticker, "1s", wsKlineHandler, errHandler)
+
+	symbolIntervalPair := make(map[string]string)
+	for _, ticker := range tickers {
+		symbolIntervalPair[ticker] = interval
+	}
+
+	doneC, _, err := binance.WsCombinedKlineServe(symbolIntervalPair, wsKlineHandler, errHandler)
+	if err != nil {
+			fmt.Println(err)
+			return
+	}
+	<-doneC
+}
+
+// 주어진 symbol들에 대한 Upbit API Ticker 데이터를 웹소켓으로 받아와 /data/upbit.txt에 저장
+// https://docs.upbit.com/docs/upbit-quotation-websocket#현재가ticker-응답
+func save_upbit_ticker(tickers []string) {
+	errHandler := func (err error)  {
+		fmt.Println(err)	
+	}
+	wsTickerHandler := func(event *upbit.WsSimpleTicker) {
+			file, err := os.OpenFile("data/upbit.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+			if err != nil {
+					fmt.Println(err)
+					return
+			}
+			jsonEvent, err := json.Marshal(event)
+			checkError(err)
+			_, err = io.WriteString(file, string(jsonEvent) + "\n")
+			checkError(err)
+	}
+	doneC, _, err := upbit.WsCombinedTickerServe(tickers, wsTickerHandler, errHandler)
 	if err != nil {
 			fmt.Println(err)
 			return
@@ -42,59 +74,14 @@ func save_binance_kline(ticker string) {
 
 }
 
-const upbit_ws_url = "wss://api.upbit.com/websocket/v1"
-
-func save_upbit_trade_data(ticker string) {
-
-	conn, _, err := websocket.DefaultDialer.Dial(upbit_ws_url, nil)
-	if err != nil {
-			fmt.Println(err)
-			return
-	}
-	defer conn.Close()
-
-	subscribe_fmt := fmt.Sprintf(`[{"ticket":"test"},{"type":"ticker","codes":["%s"], "isOnlyRealtime" : "true"}]`, ticker) 
-
-	conn.WriteMessage(websocket.TextMessage, []byte(subscribe_fmt))
-
-	if err != nil {
-			fmt.Println(err)
-			return
-	}
-
-
-	for {
-			_, message, err := conn.ReadMessage()
-			if err != nil {
-					fmt.Println(err)
-					return
-			}
-
-			file, err := os.OpenFile("data/upbit/" + ticker + ".txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-			if err != nil {
-					fmt.Println(err)
-					return
-			}
-
-			_, err = io.WriteString(file, string(message) + "\n")
-			checkError(err)
-	}
-
-}
-
-
-
 
 func main() {
 
 	var wait sync.WaitGroup
-	wait.Add(4)
+	wait.Add(2)
 
-	go save_binance_kline("btcusdt")
-	go save_binance_kline("ethusdt")
-
-	go save_upbit_trade_data("KRW-BTC")
-	go save_upbit_trade_data("KRW-ETH")
+	go save_binance_kline([]string{"btcusdt", "ethusdt"}, "1s")
+	go save_upbit_ticker([]string{"KRW-BTC", "KRW-ETH"})
 
 	wait.Wait()
 
