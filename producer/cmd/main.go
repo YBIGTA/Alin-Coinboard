@@ -11,6 +11,11 @@ import (
 	"github.com/adshao/go-binance/v2"
 )
 
+const (
+	binanceTopic = "dev.alin.binance.json"
+	upbitTopic = "dev.alin.upbit.json"
+)
+
 func checkError(err error) {
   if err != nil {
     fmt.Println(err)
@@ -25,7 +30,7 @@ func save_binance_kline(tickers []string, interval string) {
 		fmt.Println(err)
 	}
 	wsKlineHandler := func(event *binance.WsKlineEvent) {
-		file, err := os.OpenFile("data/binance.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+		file, err := os.OpenFile("../data/binance.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 		checkError(err)
 
 		jsonEvent, err := json.Marshal(event)
@@ -33,6 +38,8 @@ func save_binance_kline(tickers []string, interval string) {
 
 		_, err = io.WriteString(file, string(jsonEvent) + "\n")
 		checkError(err)
+
+		// produceMessageToCluster(binanceTopic, string(jsonEvent))
 	}
 
 	symbolIntervalPair := make(map[string]string)
@@ -55,7 +62,7 @@ func save_upbit_ticker(tickers []string) {
 		fmt.Println(err)	
 	}
 	wsTickerHandler := func(event *upbit.WsSimpleTicker) {
-			file, err := os.OpenFile("data/upbit.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+			file, err := os.OpenFile("../data/upbit.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 			if err != nil {
 					fmt.Println(err)
 					return
@@ -64,6 +71,8 @@ func save_upbit_ticker(tickers []string) {
 			checkError(err)
 			_, err = io.WriteString(file, string(jsonEvent) + "\n")
 			checkError(err)
+
+			// produceMessageToCluster(upbitTopic, string(jsonEvent))
 	}
 	doneC, _, err := upbit.WsCombinedTickerServe(tickers, wsTickerHandler, errHandler)
 	if err != nil {
