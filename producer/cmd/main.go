@@ -4,7 +4,6 @@ import (
 	"alin-coinboard/producer/pkg/upbit"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"sync"
 
@@ -30,14 +29,16 @@ func save_binance_kline(tickers []string, interval string) {
 		fmt.Println(err)
 	}
 	wsKlineHandler := func(event *binance.WsKlineEvent) {
-		file, err := os.OpenFile("../data/binance.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-		checkError(err)
+		// file, err := os.OpenFile("../data/binance.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+		// checkError(err)
 
 		jsonEvent, err := json.Marshal(event)
 		checkError(err)
 
-		_, err = io.WriteString(file, string(jsonEvent) + "\n")
-		checkError(err)
+		// _, err = io.WriteString(file, string(jsonEvent) + "\n")
+		// checkError(err)
+
+		fmt.Println(string(jsonEvent))
 
 		// produceMessageToCluster(binanceTopic, string(jsonEvent))
 	}
@@ -62,15 +63,17 @@ func save_upbit_ticker(tickers []string) {
 		fmt.Println(err)	
 	}
 	wsTickerHandler := func(event *upbit.WsSimpleTicker) {
-			file, err := os.OpenFile("../data/upbit.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-			if err != nil {
-					fmt.Println(err)
-					return
-			}
+			// file, err := os.OpenFile("../data/upbit.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+			// if err != nil {
+			// 		fmt.Println(err)
+			// 		return
+			// }
 			jsonEvent, err := json.Marshal(event)
 			checkError(err)
-			_, err = io.WriteString(file, string(jsonEvent) + "\n")
+			// _, err = io.WriteString(file, string(jsonEvent) + "\n")
 			checkError(err)
+
+			fmt.Println(string(jsonEvent))
 
 			// produceMessageToCluster(upbitTopic, string(jsonEvent))
 	}
