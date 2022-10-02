@@ -22,7 +22,7 @@ func checkError(err error) {
   }
 }
 
-// 주어진 symbol들에 대한 Binance API Kline 데이터를 웹소켓으로 받아와 /data/binance.txt에 저장
+// 주어진 symbol들에 대한 Binance API Kline 데이터를 웹소켓으로 받아와 카프카 프로듀서로 전송
 // https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-streams
 func produce_binance_kline(tickers []string, interval string) {
 	errHandler := func(err error) {
@@ -49,7 +49,7 @@ func produce_binance_kline(tickers []string, interval string) {
 	<-doneC
 }
 
-// 주어진 symbol들에 대한 Upbit API Ticker 데이터를 웹소켓으로 받아와 /data/upbit.txt에 저장
+// 주어진 symbol들에 대한 Upbit API Ticker 데이터를 웹소켓으로 받아와 카프카 프로듀서로 전송
 // https://docs.upbit.com/docs/upbit-quotation-websocket#현재가ticker-응답
 func produce_upbit_ticker(tickers []string) {
 	errHandler := func (err error)  {
