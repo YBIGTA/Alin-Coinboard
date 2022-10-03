@@ -15,9 +15,9 @@ import java.util.Properties;
 public class Consumer {
 
     private final static Logger log = LoggerFactory.getLogger(Consumer.class);
-    private final static String TOPIC_NAME = "dev.alin.upbit-copy.json";
+    private final static String TOPIC_NAME = "dev.alin.kimchi_premium.json";
     private final static String BOOTSTRAP_SERVERS = "localhost:9092";  /* change ip */
-    private final static String GROUP_ID = "my-application";  /* this can be anything you want */
+    private final static String GROUP_ID = "alin-application";  /* this can be anything you want */
 
     public Consumer() {}
     public static void main(String[] args) {

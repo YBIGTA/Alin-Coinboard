@@ -16,7 +16,7 @@ public class Streams {
     private static String BOOTSTRAP_SERVERS = "localhost:9092";
     private static String BINANCE_SOURCE = "dev.alin.binance.json";
     private static String UPBIT_SOURCE = "dev.alin.upbit.json";
-    private static String SINK = "dev.alin.upbit-copy.json";
+    private static String SINK = "dev.alin.kimchi_premium.json";
 
     public static void main(String[] args){
         Properties props = new Properties();
