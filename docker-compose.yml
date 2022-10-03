@@ -55,7 +55,7 @@ services:
       # blocks until kafka is reachable
       kafka-topics --bootstrap-server kafka:29092 --list
 
-      kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.binance.json --from-beginning
+      kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.binance.json --from-beginning --property print.key=true --property key.separator=:
       "
 
   upbit-consumer:
@@ -68,5 +68,5 @@ services:
       # blocks until kafka is reachable
       kafka-topics --bootstrap-server kafka:29092 --list
 
-      kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.upbit.json --from-beginning
+      kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.upbit.json --from-beginning --property print.key=true --property key.separator=:
       "

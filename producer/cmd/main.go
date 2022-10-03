@@ -33,7 +33,7 @@ func produce_binance_kline(tickers []string, interval string) {
 		jsonEvent, err := json.Marshal(event)
 		checkError(err)
 
-		produceMessageToCluster(binanceTopic, string(jsonEvent))
+		produceMessageToCluster(binanceTopic, event.Symbol, string(jsonEvent))
 	}
 
 	symbolIntervalPair := make(map[string]string)
@@ -60,7 +60,7 @@ func produce_upbit_ticker(tickers []string) {
 			jsonEvent, err := json.Marshal(event)
 			checkError(err)
 
-			produceMessageToCluster(upbitTopic, string(jsonEvent))
+			produceMessageToCluster(upbitTopic, event.Symbol, string(jsonEvent))
 	}
 	doneC, _, err := upbit.WsCombinedTickerServe(tickers, wsTickerHandler, errHandler)
 	if err != nil {
