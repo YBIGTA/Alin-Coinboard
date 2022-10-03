@@ -9,7 +9,7 @@ import (
 // 카프카 클러스터 주소만 바꿔주면 됨.
 const bootstrapServer = "localhost:9092"
 
-func produceMessageToCluster(topic string, message string) {
+func produceMessageToCluster(topic string, key string, message string) {
 
 	cfg := &kafka.ConfigMap{
 		"bootstrap.servers": bootstrapServer,
@@ -38,7 +38,8 @@ func produceMessageToCluster(topic string, message string) {
 
 	p.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-		Value:          []byte(message),
+		Key: 	[]byte(key),
+		Value:  []byte(message),
 	}, nil)
 
 	// Wait for message deliveries before shutting down
