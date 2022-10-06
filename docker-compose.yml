@@ -12,6 +12,7 @@ services:
   # reachable on 9092 from the host and on 29092 from inside docker compose
   kafka:
     image: confluentinc/cp-kafka
+    container_name: alin-kafka
     depends_on:
       - zookeeper
     ports:
@@ -40,6 +41,7 @@ services:
       echo -e 'Creating kafka topics'
       kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic dev.alin.binance.json --replication-factor 1 --partitions 1
       kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic dev.alin.upbit.json --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic dev.alin.kimchi_premium.json --replication-factor 1 --partitions 1
 
       echo -e 'Successfully created the following topics:'
       kafka-topics --bootstrap-server kafka:29092 --list
@@ -70,3 +72,26 @@ services:
 
       kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.upbit.json --from-beginning --property print.key=true --property key.separator=:
       "
+
+  kimchi-premium-consumer:
+    image: confluentinc/cp-kafka
+    depends_on:
+      - init-kafka
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server kafka:29092 --list
+
+      kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.kimchi_premium.json --from-beginning --property print.key=true --property key.separator=:
+      "
+
+#  streams:
+#    build: 
+#      context: ./streams
+#    container_name: msa-streams
+#    depends_on:
+#      - init-kafka
+
+
+# docker network connet our-net one 
