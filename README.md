@@ -82,6 +82,9 @@ docker compose logs binance-consumer
 
 # upbit 토픽 데이터 조회 (kafka-console-consumer)
 docker compose logs upbit-consumer
+
+# kimchi premium 토픽 데이터 조회 (kafka-console-consumer)
+docker compose logs kimchi-premium-consumer
 ```
 
 2. producer 코드 실행
@@ -95,4 +98,9 @@ docker compose logs upbit-consumer
 
 # 윈도우즈 환경에서 실행
 start ./producer/bin/start-producer-windows-amd64.exe
+```
+
+3. 킴치프리미엄 스트리밍
+```
+java -jar ./streams/out/artifacts/streams_jar/streams.jar
 ```
