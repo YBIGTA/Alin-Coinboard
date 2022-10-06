@@ -13,7 +13,7 @@ import java.util.Properties;
 
 public class Streams {
     private static String APPLICATION_NAME = "kimchi-premium-dev";
-    private static String BOOTSTRAP_SERVERS = "localhost:9092";
+    private static String BOOTSTRAP_SERVERS = "kafka:29092";
     private static String BINANCE_SOURCE = "dev.alin.binance.json";
     private static String UPBIT_SOURCE = "dev.alin.upbit.json";
     private static String SINK = "dev.alin.kimchi_premium.json";

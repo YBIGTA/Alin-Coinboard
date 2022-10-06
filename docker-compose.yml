@@ -12,7 +12,6 @@ services:
   # reachable on 9092 from the host and on 29092 from inside docker compose
   kafka:
     image: confluentinc/cp-kafka
-    container_name: alin-kafka
     depends_on:
       - zookeeper
     ports:
@@ -86,12 +85,12 @@ services:
       kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.kimchi_premium.json --from-beginning --property print.key=true --property key.separator=:
       "
 
-#  streams:
-#    build: 
-#      context: ./streams
-#    container_name: msa-streams
-#    depends_on:
-#      - init-kafka
+  streams:
+    build: 
+      context: ./streams
+    container_name: msa-streams
+    depends_on:
+      - init-kafka
 
 
 # docker network connet our-net one 
