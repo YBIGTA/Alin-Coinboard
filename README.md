@@ -100,7 +100,3 @@ docker compose logs kimchi-premium-consumer
 start ./producer/bin/start-producer-windows-amd64.exe
 ```
 
-3. 킴치프리미엄 스트리밍
-```
-java -jar ./streams/out/artifacts/streams_jar/streams.jar
-```
