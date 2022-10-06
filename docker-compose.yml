@@ -92,5 +92,3 @@ services:
     depends_on:
       - init-kafka
 
-
-# docker network connet our-net one 
