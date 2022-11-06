@@ -87,16 +87,3 @@ docker compose logs upbit-consumer
 docker compose logs kimchi-premium-consumer
 ```
 
-2. producer 코드 실행
-
-```bash
-# Intel Mac 환경에서 실행
-./producer/bin/start-producer-darwin-amd64
-
-# Apple Silicon Mac 환경에서 실행
-./producer/bin/start-producer-darwin-arm64
-
-# 윈도우즈 환경에서 실행
-start ./producer/bin/start-producer-windows-amd64.exe
-```
-
