@@ -86,9 +86,8 @@ services:
       "
 
   streams:
-    build: 
+    build:
       context: ./streams
     container_name: msa-streams
     depends_on:
       - init-kafka
-
