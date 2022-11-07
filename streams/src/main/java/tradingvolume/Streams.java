@@ -2,7 +2,6 @@ package tradingvolume;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kimchipremium.KimchiPremiumUtil;
 import tradingvolume.TradingVolume;
 import tradingvolume.TradingVolumeUtil;
 import org.apache.kafka.common.serialization.Serdes;
@@ -63,7 +62,7 @@ public class Streams {
         String hTmp = binanceSplit[11];
         String lTmp = binanceSplit[12];
         String nTmp = binanceSplit[14];
-        Float n = getPrice(nTmp, true);
+        Float n = getPrice(nTmp, false);
         Float h = getPrice(hTmp, true);
         Float l = getPrice(lTmp, true);
         binancePrice = (h + l) / 2;
@@ -75,7 +74,7 @@ public class Streams {
     }
 
     private static Float getPrice(String str, Boolean isQuoted){
-        return Float.valueOf(KimchiPremiumUtil.getValue(str, isQuoted));
+        return Float.valueOf(TradingVolumeUtil.getValue(str, isQuoted));
     }
 
 }
