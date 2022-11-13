@@ -85,5 +85,8 @@ docker compose logs upbit-consumer
 
 # kimchi premium 토픽 데이터 조회 (kafka-console-consumer)
 docker compose logs kimchi-premium-consumer
+
+# trading volume 토픽 데이터 조회 (kafka-console-consumer)
+docker compose logs trading-volume-consumer
 ```
 
