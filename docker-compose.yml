@@ -1,4 +1,5 @@
-version: "2.1"
+version: "3.8"
+
 services:
   # Zookeeper service for kafka cluster
   zookeeper:
@@ -117,10 +118,8 @@ services:
       - init-kafka
 
 
-  # producer:
+  # alin-coinboard-producer:
   #   build:
   #     context: ./producer
-  #   container_name: coin-producer
   #   depends_on:
   #     - init-kafka
-
