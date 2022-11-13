@@ -2,6 +2,8 @@ package tradingvolume;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kimchipremium.Binance;
+import kimchipremium.KimchiPremiumUtil;
 import tradingvolume.TradingVolume;
 import tradingvolume.TradingVolumeUtil;
 import org.apache.kafka.common.serialization.Serdes;
@@ -15,7 +17,7 @@ import java.util.Properties;
 
 public class Streams {
     private static String APPLICATION_NAME = "trading-volume-dev";
-    private static String BOOTSTRAP_SERVERS = "localhost:9092";
+    private static String BOOTSTRAP_SERVERS = "kafka:29092";
     private static String BINANCE_SOURCE = "dev.alin.binance.json";
     private static String SINK = "dev.alin.trading_volume.json";
 
@@ -44,37 +46,29 @@ public class Streams {
         streams.start();
     }
 
-    private static String getTradingVolumeJson(String coin, String val) throws JsonProcessingException {
-        Float volume = getTradingVolume(val);
-        String timestamp = TradingVolumeUtil.getValue(val.split(",")[1], true);
-        String date = TradingVolumeUtil.changeTimestampToDateString(timestamp);
+    private static String getTradingVolumeJson(String coin, String binanceString) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Binance binance = objectMapper.readValue(binanceString, Binance.class);
+
+        Float volume = getTradingVolume(binance);
+        Long timestamp = binance.getEventTime();
+        String date = KimchiPremiumUtil.changeTimestampToDateString(timestamp);
 
         TradingVolume tradingVolume = new TradingVolume(coin, volume, date);
         System.out.println("tradingVolume = " + tradingVolume);
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonInString = mapper.writeValueAsString(tradingVolume);
-        return jsonInString;
+        String jsonString = objectMapper.writeValueAsString(tradingVolume);
+        return jsonString;
     }
 
-    private static Float getTradingVolume(String val){
-        Float binancePrice = 0f;
-        String[] binanceSplit = val.split(",");
-        String hTmp = binanceSplit[11];
-        String lTmp = binanceSplit[12];
-        String nTmp = binanceSplit[14];
-        Float n = getPrice(nTmp, false);
-        Float h = getPrice(hTmp, true);
-        Float l = getPrice(lTmp, true);
-        binancePrice = (h + l) / 2;
+    private static Float getTradingVolume(Binance binance){
+        Binance.Kline kline = binance.getKline();
+        Long n = kline.getNumberOfTrades();
+        Float h = kline.getHighPrice();
+        Float l = kline.getLowPrice();
+        Float binancePrice = (h + l) / 2;
 
         Float tradingVolume = binancePrice * n;
-
         return tradingVolume;
-
-    }
-
-    private static Float getPrice(String str, Boolean isQuoted){
-        return Float.valueOf(TradingVolumeUtil.getValue(str, isQuoted));
     }
 
 }

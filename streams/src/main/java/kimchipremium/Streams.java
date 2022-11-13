@@ -17,6 +17,7 @@ public class Streams {
     private static String BINANCE_SOURCE = "dev.alin.binance.json";
     private static String UPBIT_SOURCE = "dev.alin.upbit.json";
     private static String SINK = "dev.alin.kimchi_premium.json";
+    private static final Float EXCHANGE_RATE = 1319.00f;
 
     public static void main(String[] args){
         Properties props = new Properties();
@@ -47,38 +48,33 @@ public class Streams {
 
     }
 
-    private static String getKimchiPremiumJson(String binance, String upbit) throws JsonProcessingException {
-        String coin = KimchiPremiumUtil.getValue(binance.split(",")[2], true);
-        coin = coin.substring(0, 3);
+    private static String getKimchiPremiumJson(String binanceString, String upbitString) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Binance binance = objectMapper.readValue(binanceString, Binance.class);
+        Upbit upbit = objectMapper.readValue(upbitString, Upbit.class);
+
+        String coin = binance.getSymbol().substring(0, 3);
         Float premiumPrice = getPremiumPrice(binance, upbit);
-        String timestamp = KimchiPremiumUtil.getValue(binance.split(",")[1], false);
+
+        Long timestamp = binance.getEventTime();
         String date = KimchiPremiumUtil.changeTimestampToDateString(timestamp);
 
         KimchiPremium kimchiPremium = new KimchiPremium(coin, premiumPrice, date);
         System.out.println("kimchiPremium = " + kimchiPremium);
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonInString = mapper.writeValueAsString(kimchiPremium);
-        return jsonInString;
+        String jsonString = objectMapper.writeValueAsString(kimchiPremium);
+        return jsonString;
     }
 
-    private static Float getPremiumPrice(String binance, String upbit){
-        Float upbitPrice = 0f;
-        String tpTmp = upbit.split(",")[5];
-        upbitPrice = getPrice(tpTmp, false);
+    private static Float getPremiumPrice(Binance binance, Upbit upbit){
+        Binance.Kline kline = binance.getKline();
+        Float h = kline.getHighPrice();
+        Float l = kline.getLowPrice();
+        Float binancePrice = (h + l) / 2;
 
-        Float binancePrice = 0f;
-        String[] binanceSplit = binance.split(",");
-        String hTmp = binanceSplit[11];
-        Float h = getPrice(hTmp, true);
-        String lTmp = binanceSplit[12];
-        Float l = getPrice(lTmp, true);
-        binancePrice = (h+l) / 2;
+        Float upbitPrice = upbit.getTradePrice();
 
-        Float premiumPrice = upbitPrice - binancePrice * 1450;
+        Float premiumPrice = upbitPrice - binancePrice * EXCHANGE_RATE;
         return premiumPrice;
     }
 
-    private static Float getPrice(String str, Boolean isQuoted){
-        return Float.valueOf(KimchiPremiumUtil.getValue(str, isQuoted));
-    }
 }

@@ -86,12 +86,37 @@ services:
       kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.kimchi_premium.json --from-beginning --property print.key=true --property key.separator=:
       "
 
-  kafka-streams:
-    build:
-      context: ./streams
-    container_name: kafka-streams
+  trading-volume-consumer:
+    image: confluentinc/cp-kafka
     depends_on:
       - init-kafka
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server kafka:29092 --list
+
+      kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.trading_volume.json --from-beginning --property print.key=true --property key.separator=:
+      "
+
+
+
+  kafka-streams-kimchipremium:
+    build:
+      context: ./streams
+      dockerfile: Dockerfile-Kimchipremium
+    container_name: kafka-streams-kimchipremium
+    depends_on:
+      - init-kafka
+
+  kafka-streams-tradingvolume:
+    build:
+      context: ./streams
+      dockerfile: Dockerfile-Tradingvolume
+    container_name: kafka-streams-tradingvolume
+    depends_on:
+      - init-kafka
+
 
   # alin-coinboard-producer:
   #   build:
