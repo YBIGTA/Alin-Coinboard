@@ -5,17 +5,21 @@ ENV GO111MODULE=on \
     GOOS=linux \
     GOARCH=amd64
 
-WORKDIR /build
+WORKDIR /go/src/producer
+
+# RUN apt-get update && apt-get install -y \
+#     build-essential 
 
 COPY go.mod go.sum ./
 COPY cmd ./cmd
 COPY pkg ./pkg
 
 RUN go mod download
+
 RUN go build -o producer ./cmd
 
 FROM scratch
 
-COPY --from=builder /build/producer /producer
+COPY --from=builder /go/src/producer/producer /producer
 
 ENTRYPOINT ["/producer"]
