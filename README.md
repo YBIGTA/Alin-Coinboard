@@ -85,5 +85,15 @@ docker compose logs upbit-consumer
 
 # kimchi premium 토픽 데이터 조회 (kafka-console-consumer)
 docker compose logs kimchi-premium-consumer
-```
 
+# 프로듀서 실행
+
+# Apple Silicon
+./producer/bin/start-producer-darwin-arm64
+
+# Apple Intel
+./producer/bin/start-producer-darwin-amd64
+
+# Windows
+./producer/bin/start-producer-windows-amd64.exe
+```
