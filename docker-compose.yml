@@ -85,9 +85,16 @@ services:
       kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.kimchi_premium.json --from-beginning --property print.key=true --property key.separator=:
       "
 
-  streams:
+  kafka-streams:
     build:
       context: ./streams
-    container_name: msa-streams
+    container_name: kafka-streams
+    depends_on:
+      - init-kafka
+
+  producer:
+    build:
+      context: ./producer
+    container_name: coin-producer
     depends_on:
       - init-kafka
