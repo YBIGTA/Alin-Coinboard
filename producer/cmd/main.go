@@ -1,6 +1,7 @@
 package main
 
 import (
+	// "alin-coinboard/producer/pkg/upbit"
 	"alin-coinboard/producer/pkg/upbit"
 	"encoding/json"
 	"fmt"
@@ -14,6 +15,7 @@ const (
 	binanceTopic = "dev.alin.binance.json"
 	upbitTopic = "dev.alin.upbit.json"
 )
+
 
 func checkError(err error) {
   if err != nil {
