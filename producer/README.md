@@ -12,3 +12,11 @@ build.sh : 빌드용 스크립트
 go.mod
 go.sum
 ```
+
+## 도커파일
+
+빌드 시 amd64환경에서 실행해줘야 하므로 buidlx 이용해서 빌드
+
+```bash
+docker buildx build -t golang-producer-build:latest --platform linux/amd64 .
+```
