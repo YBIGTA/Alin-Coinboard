@@ -99,8 +99,6 @@ services:
       kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.trading_volume.json --from-beginning --property print.key=true --property key.separator=:
       "
 
-
-
   kafka-streams-kimchipremium:
     build:
       context: ./streams
@@ -117,6 +115,12 @@ services:
     depends_on:
       - init-kafka
 
+  s3-sink-connector:
+    build:
+      context: ./s3-sink
+      dockerfile: Dockerfile
+    depends_on:
+      - init-kafka
 
   # alin-coinboard-producer:
   #   build:
