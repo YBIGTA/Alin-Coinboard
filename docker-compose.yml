@@ -99,8 +99,6 @@ services:
       kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.trading_volume.json --from-beginning --property print.key=true --property key.separator=:
       "
 
-
-
   kafka-streams-kimchipremium:
     build:
       context: ./streams
@@ -117,6 +115,25 @@ services:
     depends_on:
       - init-kafka
 
+  s3-sink-connector:
+    env_file:
+      - ./s3-sink/.env
+    build:
+      context: ./s3-sink
+      dockerfile: Dockerfile
+    depends_on:
+      - init-kafka
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      aws configure set aws_access_key_id $${AWS_ACCESS_KEY_ID}
+      aws configure set aws_secret_access_key $${AWS_SECRET_ACCESS_KEY}
+
+      # blocks until kafka is reachable
+      ./kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
+
+      ./kafka/bin/connect-standalone.sh ./kafka/config/connect-standalone.properties ./kafka/config/s3-sink.properties
+      "
 
   # alin-coinboard-producer:
   #   build:
