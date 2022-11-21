@@ -70,7 +70,13 @@ T_Vol --> S3
 
 ## 개발환경 셋업 방법
 
-1. `docker-compose` 를 이용한 카프카 개발환경 실행
+1. AWS 환경변수 파일 생성
+
+`/s3-sink/.env`에 AWS IAM 사용자의 Access Key와 Secret Key를 입력한다.
+
+생성할 환경변수 파일의 형태는 `.env.example`에 나와있다.
+
+2. `docker-compose` 를 이용한 카프카 개발환경 실행
 
 ```bash
 
