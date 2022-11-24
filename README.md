@@ -108,3 +108,6 @@ docker compose logs trading-volume-consumer
 
 
 ```
+
+## Kafdrop kafka 모니터링
+http://localhost:9000 
