@@ -22,9 +22,6 @@ WORKDIR /app
 
 COPY --from=builder /app/kafka ./kafka 
 
-RUN ./kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
-
-RUN ./kafka/bin/connect-standalone.sh ./kafka/config/connect-standalone.properties ./kafka/config/elasticsearch-sink.properties
 
 
 

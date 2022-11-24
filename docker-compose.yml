@@ -135,6 +135,21 @@ services:
       ./kafka/bin/connect-standalone.sh ./kafka/config/connect-standalone.properties ./kafka/config/s3-sink.properties
       "
 
+  elasticsearch-sink-connector:
+    build:
+      context: ./elastic-sink
+      dockerfile: Dockerfile
+    depends_on:
+      - init-kafka
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      # blocks until kafka is reachable
+      ./kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
+
+      ./kafka/bin/connect-standalone.sh ./kafka/config/connect-standalone.properties ./kafka/config/elasticsearch-sink.properties
+      "
+
   # alin-coinboard-producer:
   #   build:
   #     context: ./producer
