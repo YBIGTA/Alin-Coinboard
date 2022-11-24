@@ -25,6 +25,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      
       KAFKA_MIN_INSYNC_REPLICAS: "1"
 
   # create a topic for kafka
@@ -37,16 +38,13 @@ services:
       "
       # blocks until kafka is reachable
       kafka-topics --bootstrap-server kafka:29092 --list
-
       echo -e 'Creating kafka topics'
       kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic dev.alin.binance.json --replication-factor 1 --partitions 1
       kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic dev.alin.upbit.json --replication-factor 1 --partitions 1
       kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic dev.alin.kimchi_premium.json --replication-factor 1 --partitions 1
-
       echo -e 'Successfully created the following topics:'
       kafka-topics --bootstrap-server kafka:29092 --list
       "
-
   binance-consumer:
     image: confluentinc/cp-kafka
     depends_on:
@@ -56,10 +54,8 @@ services:
       "
       # blocks until kafka is reachable
       kafka-topics --bootstrap-server kafka:29092 --list
-
       kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.binance.json --from-beginning --property print.key=true --property key.separator=:
       "
-
   upbit-consumer:
     image: confluentinc/cp-kafka
     depends_on:
@@ -69,10 +65,8 @@ services:
       "
       # blocks until kafka is reachable
       kafka-topics --bootstrap-server kafka:29092 --list
-
       kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.upbit.json --from-beginning --property print.key=true --property key.separator=:
       "
-
   kimchi-premium-consumer:
     image: confluentinc/cp-kafka
     depends_on:
@@ -82,10 +76,8 @@ services:
       "
       # blocks until kafka is reachable
       kafka-topics --bootstrap-server kafka:29092 --list
-
       kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.kimchi_premium.json --from-beginning --property print.key=true --property key.separator=:
       "
-
   trading-volume-consumer:
     image: confluentinc/cp-kafka
     depends_on:
@@ -95,10 +87,8 @@ services:
       "
       # blocks until kafka is reachable
       kafka-topics --bootstrap-server kafka:29092 --list
-
       kafka-console-consumer --bootstrap-server kafka:29092 --topic dev.alin.trading_volume.json --from-beginning --property print.key=true --property key.separator=:
       "
-
   kafka-streams-kimchipremium:
     build:
       context: ./streams
@@ -128,30 +118,37 @@ services:
       "
       aws configure set aws_access_key_id $${AWS_ACCESS_KEY_ID}
       aws configure set aws_secret_access_key $${AWS_SECRET_ACCESS_KEY}
-
       # blocks until kafka is reachable
       ./kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
-
       ./kafka/bin/connect-standalone.sh ./kafka/config/connect-standalone.properties ./kafka/config/s3-sink.properties
       "
-
-  elasticsearch-sink-connector:
-    build:
-      context: ./elastic-sink
-      dockerfile: Dockerfile
-    depends_on:
-      - init-kafka
-    entrypoint: ["/bin/sh", "-c"]
-    command: |
-      "
-      # blocks until kafka is reachable
-      ./kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
-
-      ./kafka/bin/connect-standalone.sh ./kafka/config/connect-standalone.properties ./kafka/config/elasticsearch-sink.properties
-      "
-
+  # elasticsearch-sink-connector:
+  #   build:
+  #     context: ./elastic-sink
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     - init-kafka
+  #   entrypoint: ["/bin/sh", "-c"]
+  #   command: |
+  #     "
+  #     # blocks until kafka is reachable
+  #     ./kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
+  #     ./kafka/bin/connect-standalone.sh ./kafka/config/connect-standalone.properties ./kafka/config/elasticsearch-sink.properties
+  #     "
   # alin-coinboard-producer:
   #   build:
   #     context: ./producer
   #   depends_on:
   #     - init-kafka
+
+
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    restart: "no"
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKER_CONNECT: "kafka:29092"
+    depends_on:
+      - kafka
