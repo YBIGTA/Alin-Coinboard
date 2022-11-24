@@ -12,7 +12,7 @@ RUN wget https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-co
 RUN unzip confluentinc-kafka-connect-elasticsearch-14.0.2.zip -d kafka/plugins
 RUN mv kafka/plugins/confluentinc-kafka-connect-elasticsearch-14.0.2 kafka/plugins/kafka-connect-elasticsearch
 
-COPY ./configs/s3-sink.properties kafka/config/elasticsearch-sink.properties
+COPY ./configs/elasticsearch-sink.properties kafka/config/elasticsearch-sink.properties
 COPY ./configs/connect-distributed.properties kafka/config/connect-distributed.properties
 COPY ./configs/connect-standalone.properties kafka/config/connect-standalone.properties
 

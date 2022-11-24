@@ -25,7 +25,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
-      
+
       KAFKA_MIN_INSYNC_REPLICAS: "1"
 
   # create a topic for kafka
@@ -122,26 +122,49 @@ services:
       ./kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
       ./kafka/bin/connect-standalone.sh ./kafka/config/connect-standalone.properties ./kafka/config/s3-sink.properties
       "
-  # elasticsearch-sink-connector:
-  #   build:
-  #     context: ./elastic-sink
-  #     dockerfile: Dockerfile
+
+  elasticsearch-sink-connector:
+    build:
+      context: ./elasticsearch-sink
+      dockerfile: Dockerfile
+    depends_on:
+      - init-kafka
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      # blocks until kafka is reachable
+      ./kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
+
+      ./kafka/bin/connect-standalone.sh ./kafka/config/connect-standalone.properties ./kafka/config/elasticsearch-sink.properties
+      "
+
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.5.2
+  #   container_name: elasticsearch
+  #   environment:
+  #     - discovery.type=single-node
+  #   ports:
+  #     - 9200:9200
+  #     - 9300:9300
+  #   volumes:
+  #     - ./elasticsearch/data:/usr/share/elasticsearch/data
+  #     - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:8.5.2
+  #   container_name: kibana
+  #   ports:
+  #     - 5601:5601
+  #   environment:
+  #     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
   #   depends_on:
-  #     - init-kafka
-  #   entrypoint: ["/bin/sh", "-c"]
-  #   command: |
-  #     "
-  #     # blocks until kafka is reachable
-  #     ./kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
-  #     ./kafka/bin/connect-standalone.sh ./kafka/config/connect-standalone.properties ./kafka/config/elasticsearch-sink.properties
-  #     "
+  #     - elasticsearch
+
   # alin-coinboard-producer:
   #   build:
   #     context: ./producer
   #   depends_on:
   #     - init-kafka
-
-
 
   kafdrop:
     image: obsidiandynamics/kafdrop
