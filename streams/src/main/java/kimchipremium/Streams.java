@@ -17,7 +17,7 @@ public class Streams {
     private static String BINANCE_SOURCE = "dev.alin.binance.json";
     private static String UPBIT_SOURCE = "dev.alin.upbit.json";
     private static String SINK = "dev.alin.kimchi_premium.json";
-    private static final Float EXCHANGE_RATE = 1319.00f;
+    private static final Float EXCHANGE_RATE = 1338.00f;
 
     public static void main(String[] args){
         Properties props = new Properties();

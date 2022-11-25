@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kimchipremium.Binance;
 import kimchipremium.KimchiPremiumUtil;
+import org.apache.kafka.streams.KeyValue;
 import tradingvolume.TradingVolume;
 import tradingvolume.TradingVolumeUtil;
 import org.apache.kafka.common.serialization.Serdes;
@@ -31,10 +32,10 @@ public class Streams {
         StreamsBuilder builder = new StreamsBuilder();
 
         KStream<String, String> binanceStream = builder.stream(BINANCE_SOURCE);
-        binanceStream.selectKey(
+        binanceStream.map(
                 (coin, v) -> {
                     try {
-                        return getTradingVolumeJson(coin, v);
+                        return new KeyValue<>(coin, getTradingVolumeJson(coin, v));
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                         return null;
