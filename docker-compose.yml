@@ -129,36 +129,51 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - init-kafka
+      - elasticsearch
     entrypoint: ["/bin/sh", "-c"]
     command: |
       "
       # blocks until kafka is reachable
       ./kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
 
+      # blocks until elasticsearch is reachable
+      # block using while loop until elasticsearch is reachable
+      while ! curl -X GET http://elasticsearch:9200; do
+        echo 'Waiting for elasticsearch to be ready'
+        sleep 5
+      done
+
       ./kafka/bin/connect-standalone.sh ./kafka/config/connect-standalone.properties ./kafka/config/elasticsearch-sink.properties
       "
 
-  # elasticsearch:
-  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.5.2
-  #   container_name: elasticsearch
-  #   environment:
-  #     - discovery.type=single-node
-  #   ports:
-  #     - 9200:9200
-  #     - 9300:9300
-  #   volumes:
-  #     - ./elasticsearch/data:/usr/share/elasticsearch/data
-  #     - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.2
+    environment:
+      - node.name=es01
+      - cluster.name=dev-alin-coinboad-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.security.autoconfiguration.enabled=false
+    ports:
+      - 9200:9200
+      - 9300:9300
+    expose:
+      - 9200
+      - 9300
+    # volumes:
+    #   - ./elasticsearch/data:/usr/share/elasticsearch/data
+    #   - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
 
-  # kibana:
-  #   image: docker.elastic.co/kibana/kibana:8.5.2
-  #   container_name: kibana
-  #   ports:
-  #     - 5601:5601
-  #   environment:
-  #     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-  #   depends_on:
-  #     - elasticsearch
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.5.2
+    container_name: kibana
+    ports:
+      - 5601:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
 
   # alin-coinboard-producer:
   #   build:

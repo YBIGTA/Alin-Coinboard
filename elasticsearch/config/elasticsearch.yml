@@ -1,7 +1,5 @@
 cluster.name: dev-alin-elasticsearch
-network.host: 0.0.0.0
-network.port: 9200
-# node.master: true
-# node.data: true
+node.name: node-1
 # path.data: /var/lib/elasticsearch
 # path.logs: /var/log/elasticsearch
+xpack.security.enabled: false
